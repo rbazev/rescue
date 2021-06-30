@@ -5,3 +5,4 @@ In review at *Mathematical Biosciences*.
 ## Contents
 
 * `README.md`: This file.
+* `rescue_theory.py`: Scripts
