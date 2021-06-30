@@ -231,19 +231,20 @@ def prob_rescue(W0, B0, r, s, u, nmax, verbose):
 
     Returns
     -------
-    float
-        Probability of rescue.
+    tuple of floats
+        Probability of rescue (exact, approximate)
     '''
     qb = get_qb(r, s, nmax)
     qw = get_qw(r, s, u, nmax)
-    pnew = 1 - exp(-2 * W0 * u * (s - r) / r)
-    pstand = 1 - exp(-2 * B0 * (s - r))
-    orr = pstand + (1 - pstand) * pnew
+    approx_pnew = 1 - exp(-2 * W0 * u * (s - r) / r)
+    approx_stand = 1 - exp(-2 * B0 * (s - r))
+    approx_ptotal = approx_stand + (1 - approx_stand) * approx_pnew
     if verbose:
-        print('pstand:', 1 - qb ** B0, pstand)
-        print('  pnew:', 1 - qw ** W0, pnew)
-        print('ptotal:', 1 - (qw ** W0) * (qb ** B0), orr)
-    return 1 - (qw ** W0) * (qb ** B0), orr
+        print('  prob: exact, approx')
+        print('pstand:', 1 - qb ** B0, approx_stand)
+        print('  pnew:', 1 - qw ** W0, approx_pnew)
+        print('ptotal:', 1 - (qw ** W0) * (qb ** B0), approx_ptotal)
+    return 1 - (qw ** W0) * (qb ** B0), approx_ptotal
 
 
 ###################
