@@ -313,7 +313,7 @@ def prob_rescue(W0, B0, r, s, u, nmax):
 def approx_prob_rescue_new(W0, r, s, u):
     '''
     Calculate the probability of rescue from new mutations assuming weak
-    selection and weak mutation.
+    selection / weak mutation.
 
     See Equation 14.
 
@@ -341,7 +341,7 @@ def approx_prob_rescue_new(W0, r, s, u):
 def approx_prob_rescue_sv(B0, r, s):
     '''
     Calculate the probability of rescue from standing variation assuming weak
-    selection and weak mutation.
+    selection / weak mutation.
 
     See Section 2.4.2.
 
@@ -466,7 +466,7 @@ def Zn(W0, B0, r, s, u, n):
     Returns
     -------
     float
-        Total number of individuals in the population after n generations.
+        Expected total number of individuals.
     '''
     return WBn(W0, B0, r, s, u, n).sum()
 
@@ -734,7 +734,38 @@ def rescued_Zn(W0, B0, r, s, u, n, nmax):
 
     Returns
     -------
-    array([Wn, Bn])
-        Number of wildtype and mutant individuals after n generations.
+    float
+        Expected total number of individuals.
     '''
     return rescued_WBn(W0, B0, r, s, u, n, nmax).sum()
+
+
+def approx_rescued_Zn_new(W0, r, s, u, n):
+    '''
+    Expected total number of individuals in a rescued population after n
+    generations assuming weak selection / weak mutation and rescue caused by
+    new mutations.
+
+    See Section 5.2.1.
+
+    Parameters
+    ----------
+    W0 : int
+        Initial number of wildtype individuals.
+    r : float
+        Degree of maladaptation of wildtype individuals.
+    s : float
+        Effect of a beneficial mutation.
+    u : float
+        Beneficial mutation rate.
+    n : int
+        Number of generations.
+
+    Returns
+    -------
+    float
+        Expected total number of individuals.
+    '''
+    A = (1 - r) ** n
+    pb = 2 * (s - r)
+    return W0 * A * (1 - u) ** n + (r / s) * A * (1 + s) ** n / pb
