@@ -9,7 +9,7 @@
 from math import exp
 from math import factorial
 import numpy as np
-from scipy import optimize
+from scipy.optimize import root_scalar
 
 
 #########################
@@ -45,7 +45,7 @@ def phi(t, mu, nmax):
 
     Assumes Poisson offspring distribution.
 
-    Equation 2.
+    See Equation 2.
 
     Parameters
     ----------
@@ -75,7 +75,7 @@ def F(v, t, mu, u, nmax):
 
     Assumes Poisson offspring distribution.
 
-    Equation 3 and Lemma 2.1.
+    See Equation 3 and Lemma 2.1.
 
     Parameters
     ----------
@@ -100,7 +100,9 @@ def G(t, r, s, nmax):
     '''
     Pgf of the number of offspring of a beneficial individual.
 
-    Equation 4.
+    Assumes Poisson offspring distribution.
+
+    See Equation 4.
 
     Parameters
     ----------
@@ -133,7 +135,9 @@ def qb_fun(qb, r, s, nmax):
     Function used to calculate the probability of extinction of a population
     starting from one beneficial individual, qb.
 
-    qb is estimated by minimizing the value of this function.
+    qb is estimated by finding the root of this function.
+
+    See text below Equation 5.
 
     Parameters
     ----------
@@ -159,6 +163,11 @@ def get_qb(r, s, nmax):
     Estimate the probability of extinction of a population starting from one
     beneficial individual, qb.
 
+    The values of r and s must be > tol, where tol = 1e-8.
+    Solution must be in the interval [0, 1-tol].
+
+    See text below Equation 5.
+
     Parameters
     ----------
     r : float
@@ -173,8 +182,11 @@ def get_qb(r, s, nmax):
     float
         Estimate of qb.
     '''
-    sol = optimize.root_scalar(qb_fun, args=(
-        r, s, nmax), bracket=(0, 1-1e-10), x0=.5, xtol=1e-12)
+    tol = 1e-8
+    assert r > tol
+    assert s > tol
+    sol = root_scalar(qb_fun, args=(r, s, nmax),
+                      bracket=(0, 1-tol), x0=.5, xtol=tol*1e-4)
     return sol.root
 
 
@@ -182,7 +194,10 @@ def qw_fun(qw, r, s, u, nmax):
     '''
     Function used to calculate the probability of extinction of a population
     starting from one wildtype individual, qw.
-    qw is estimated by minimizing the value of this function.
+
+    qw is estimated by finding the root of this function.
+
+    See Proposition 2.2.
 
     Parameters
     ----------
@@ -207,35 +222,15 @@ def qw_fun(qw, r, s, u, nmax):
     return phi(qw * (1 - u) + u * qb, mu, nmax) - qw
 
 
-def qwu0_fun(qw, r, nmax):
-    '''
-    Function used to calculate the probability of extinction of a population
-    starting from one wildtype individual, qw, assuming no mutation.
-
-    qwu0 is estimated by minimizing the value of this function.
-
-    Parameters
-    ----------
-    qw : float
-        Probability of extinction.
-    r : float
-        Degree of maladaptation of wildtype individuals.
-    nmax : int
-        Maximum number of offspring considered.
-
-    Returns
-    -------
-    float
-        Difference between pgf and qw.
-    '''
-    mu = 1 - r
-    return phi(qw, mu, nmax) - qw
-
-
 def get_qw(r, s, u, nmax):
     '''
     Estimate the probability of extinction of a population starting from one
     wildtype individual, qw.
+
+    The values of r and s must be > tol, where tol = 1e-8.
+    Solution must be in the interval [0, 1-tol].
+
+    See Proposition 2.2.
 
     Parameters
     ----------
@@ -253,15 +248,20 @@ def get_qw(r, s, u, nmax):
     float
         Estimate of qw.
     '''
+    tol = 1e-8
+    assert r > tol
+    assert s > tol
     if u == 0:
-        if qwu0_fun(1.0, r, nmax) < 1e-12:
-            return 1.0
-        else:
-            return 'error'
+        return 1.0
     else:
-        sol = optimize.root_scalar(qw_fun, args=(
-            r, s, u, nmax), bracket=(0, 1-1e-10), x0=.5, xtol=1e-12)
+        sol = root_scalar(qw_fun, args=(r, s, u, nmax),
+                          bracket=(0, 1-tol), x0=.5, xtol=tol*1e-4)
         return sol.root
+
+
+##############
+# 2.3 Rescue #
+##############
 
 
 def prob_rescue(W0, B0, r, s, u, nmax, verbose):
