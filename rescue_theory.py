@@ -264,9 +264,13 @@ def get_qw(r, s, u, nmax):
 ##############
 
 
-def prob_rescue(W0, B0, r, s, u, nmax, verbose):
+def prob_rescue(W0, B0, r, s, u, nmax):
     '''
     Calculate the probability of rescue of a population.
+
+    Assumes Poisson offspring distribution.
+
+    See Equation 6.
 
     Parameters
     ----------
@@ -282,26 +286,63 @@ def prob_rescue(W0, B0, r, s, u, nmax, verbose):
         Mutation rate.
     nmax : int
         Maximum number of individuals to consider in Poisson distribution.
-    verbose : bool
-        Whether to show the component probabilities and the weak mutation-weak
-        selection approximations.
 
     Returns
     -------
-    tuple of floats
-        Probability of rescue (exact, approximate)
+    float
+        Probability of rescue.
     '''
     qb = get_qb(r, s, nmax)
     qw = get_qw(r, s, u, nmax)
-    approx_pnew = 1 - exp(-2 * W0 * u * (s - r) / r)
-    approx_stand = 1 - exp(-2 * B0 * (s - r))
-    approx_ptotal = approx_stand + (1 - approx_stand) * approx_pnew
-    if verbose:
-        print('  prob: exact, approx')
-        print('pstand:', 1 - qb ** B0, approx_stand)
-        print('  pnew:', 1 - qw ** W0, approx_pnew)
-        print('ptotal:', 1 - (qw ** W0) * (qb ** B0), approx_ptotal)
-    return 1 - (qw ** W0) * (qb ** B0), approx_ptotal
+    return 1 - (qw ** W0) * (qb ** B0)
+
+
+def approx_prob_rescue_new(W0, r, s, u):
+    '''
+    Calculate the probability of rescue from new mutations assuming weak
+    selection and weak mutation.
+
+    Parameters
+    ----------
+    W0 : int
+        Initial number of wildtype individuals.
+    B0 : int
+        Initial number of mutant individuals
+    r : float
+        Degree of maladaptation of wildtype individuals.
+    s : float
+        Effect of a beneficial mutation.
+    u : float
+        Mutation rate.
+
+    Returns
+    -------
+    floats
+        Probability of rescue.
+    '''
+    return 1 - exp(-2 * W0 * u * (s - r) / r)
+
+
+def approx_prob_rescue_sv(B0, r, s):
+    '''
+    Calculate the probability of rescue from standing variation assuming weak
+    selection and weak mutation.
+
+    Parameters
+    ----------
+    B0 : int
+        Initial number of mutant individuals
+    r : float
+        Degree of maladaptation of wildtype individuals.
+    s : float
+        Effect of a beneficial mutation.
+
+    Returns
+    -------
+    floats
+        Probability of rescue.
+    '''
+    return 1 - exp(-2 * B0 * (s - r))
 
 
 ###################
