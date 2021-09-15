@@ -297,10 +297,17 @@ def prob_rescue(W0, B0, r, s, u, nmax):
     return 1 - (qw ** W0) * (qb ** B0)
 
 
+##################################################
+# 2.4 Weak selection/weak mutation approximation #
+##################################################
+
+
 def approx_prob_rescue_new(W0, r, s, u):
     '''
     Calculate the probability of rescue from new mutations assuming weak
     selection and weak mutation.
+
+    See Equation 14.
 
     Parameters
     ----------
@@ -328,6 +335,8 @@ def approx_prob_rescue_sv(B0, r, s):
     Calculate the probability of rescue from standing variation assuming weak
     selection and weak mutation.
 
+    See Section 2.4.2.
+
     Parameters
     ----------
     B0 : int
@@ -345,14 +354,16 @@ def approx_prob_rescue_sv(B0, r, s):
     return 1 - exp(-2 * B0 * (s - r))
 
 
-###################
-# Population size #
-###################
+######################
+# 3. Population size #
+######################
 
 
 def M(r, s, u):
     '''
     Reproduction matrix.
+
+    See Equation 15.
 
     Parameters
     ----------
@@ -370,6 +381,8 @@ def Mn(r, s, u, n):
     '''
     nth power of reproduction matrix.
 
+    See Equation 16.
+
     Parameters
     ----------
     r : float
@@ -381,7 +394,10 @@ def Mn(r, s, u, n):
     n : int
         Power.
     '''
-    return (1 - r) ** n * np.array([[(1 - u) ** n, u * ((1 + s) ** n - (1 - u) ** n) / (s + u)], [0, (1 + s) ** n]])
+    return (1 - r) ** n * np.array(
+        [[(1 - u) ** n,
+          u * ((1 + s) ** n - (1 - u) ** n) / (s + u)],
+         [0, (1 + s) ** n]])
 
 
 def WBn(W0, B0, r, s, u, n):
@@ -414,6 +430,37 @@ def WBn(W0, B0, r, s, u, n):
     v = np.array([W0, B0])
     m = np.transpose(Mn(r, s, u, n))
     return np.dot(m, v)
+
+
+def Zn(W0, B0, r, s, u, n):
+    '''
+    Total number of individuals in the population after n generations.
+
+    Takes into account both rescued and extinct populations.
+
+    See Equation 17.
+
+    Parameters
+    ----------
+    W0 : int
+        Initial number of wildtype individuals.
+    B0 : int
+        Initial number of mutant individuals
+    r : float
+        Degree of maladaptation of wildtype individuals.
+    s : float
+        Effect of a beneficial mutation.
+    u : float
+        Mutation rate.
+    n : int
+        Number of generations
+
+    Returns
+    -------
+    float
+        Total number of individuals in the population after n generations.
+    '''
+    return WBn(W0, B0, r, s, u, n).sum()
 
 
 def dphi(t, mu, nmax):
