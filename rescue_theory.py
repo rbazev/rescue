@@ -31,7 +31,7 @@ def pois(mu, x):
 def phi(t, mu, nmax):
     '''
     Probability generating function of the number of offspring of a wildtype individual.
-    Assumes Poisson distribution.
+    Assumes Poisson offspring distribution.
 
     Parameters
     ----------
