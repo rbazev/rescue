@@ -463,6 +463,11 @@ def Zn(W0, B0, r, s, u, n):
     return WBn(W0, B0, r, s, u, n).sum()
 
 
+###########################
+# 4. Beneficial mutations #
+###########################
+
+
 def dphi(t, mu, nmax):
     '''
     Derivative of phi.
