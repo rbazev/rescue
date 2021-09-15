@@ -1,16 +1,26 @@
-from math import *
+#########################################################
+# Python code for theoretical calculations in the paper #
+# "A Branching Process Model of Evolutionary Rescue"    #
+# Ricardo B. R. Azevedo & Peter Olofsson                #
+# Last updated: September 15, 2021                      #
+#########################################################
+
+
+from math import exp
+from math import factorial
 import numpy as np
 from scipy import optimize
 
 
 #########################
-# Probability of rescue #
+# 2.1 Branching process #
 #########################
 
 
 def pois(mu, x):
     '''
-    Poisson probability mass function with parameter mu and number of occurrences x.
+    Poisson probability mass function with parameter mu and number of
+    occurrences x.
 
     Parameters
     ----------
@@ -30,13 +40,17 @@ def pois(mu, x):
 
 def phi(t, mu, nmax):
     '''
-    Probability generating function of the number of offspring of a wildtype individual.
+    Probability generating function (pgf) of the number of offspring (X) of a
+    wildtype individual.
+
     Assumes Poisson offspring distribution.
+
+    Equation 2.
 
     Parameters
     ----------
     t : float
-        Parameter of pgf.
+        Variable of pgf.
     mu : float
         Mean number of offspring.
     nmax : int
@@ -48,16 +62,45 @@ def phi(t, mu, nmax):
         Probability.
     '''
     f = 0
-    for j in range(nmax):
-        P = pois(mu, j)
-        f += (t ** j) * P
+    for k in range(nmax):
+        P = pois(mu, k)
+        f += (t ** k) * P
     return f
+
+
+def F(v, t, mu, u, nmax):
+    '''
+    Joint pgf of the number of wildtype (W) and beneficial (B) offspring of a
+    wildtype individual. Note that X = W + B.
+
+    Assumes Poisson offspring distribution.
+
+    Equation 3 and Lemma 2.1.
+
+    Parameters
+    ----------
+    v, t : float
+        Variables of pgf.
+    mu : float
+        Mean number of offspring.
+    u : float
+        Mutation rate.
+    nmax : int
+        Maximum number of offspring considered.
+
+    Returns
+    -------
+    float
+        Probability.
+    '''
+    return phi((1 - u) * v + u * t, mu, nmax)
 
 
 def G(t, r, s, nmax):
     '''
-    Probability generating function of the number of offspring of a beneficial individual
-    (Equation 4).
+    Pgf of the number of offspring of a beneficial individual.
+
+    Equation 4.
 
     Parameters
     ----------
@@ -80,9 +123,16 @@ def G(t, r, s, nmax):
     return phi(t, mu, nmax)
 
 
+##################
+# 2.2 Extinction #
+##################
+
+
 def qb_fun(qb, r, s, nmax):
     '''
-    Function used to calculate the probability of extinction of a population starting from one beneficial individual, qb.
+    Function used to calculate the probability of extinction of a population
+    starting from one beneficial individual, qb.
+
     qb is estimated by minimizing the value of this function.
 
     Parameters
@@ -106,7 +156,8 @@ def qb_fun(qb, r, s, nmax):
 
 def get_qb(r, s, nmax):
     '''
-    Estimate the probability of extinction of a population starting from one beneficial individual, qb.
+    Estimate the probability of extinction of a population starting from one
+    beneficial individual, qb.
 
     Parameters
     ----------
@@ -122,13 +173,15 @@ def get_qb(r, s, nmax):
     float
         Estimate of qb.
     '''
-    sol = optimize.root_scalar(qb_fun, args=(r, s, nmax), bracket=(0, 1-1e-10), x0=.5, xtol=1e-12)
+    sol = optimize.root_scalar(qb_fun, args=(
+        r, s, nmax), bracket=(0, 1-1e-10), x0=.5, xtol=1e-12)
     return sol.root
 
 
 def qw_fun(qw, r, s, u, nmax):
     '''
-    Function used to calculate the probability of extinction of a population starting from one wildtype individual, qw.
+    Function used to calculate the probability of extinction of a population
+    starting from one wildtype individual, qw.
     qw is estimated by minimizing the value of this function.
 
     Parameters
@@ -156,7 +209,8 @@ def qw_fun(qw, r, s, u, nmax):
 
 def qwu0_fun(qw, r, nmax):
     '''
-    Function used to calculate the probability of extinction of a population starting from one wildtype individual, qw, assuming no mutation.
+    Function used to calculate the probability of extinction of a population
+    starting from one wildtype individual, qw, assuming no mutation.
 
     qwu0 is estimated by minimizing the value of this function.
 
@@ -180,7 +234,8 @@ def qwu0_fun(qw, r, nmax):
 
 def get_qw(r, s, u, nmax):
     '''
-    Estimate the probability of extinction of a population starting from one wildtype individual, qw.
+    Estimate the probability of extinction of a population starting from one
+    wildtype individual, qw.
 
     Parameters
     ----------
@@ -204,7 +259,8 @@ def get_qw(r, s, u, nmax):
         else:
             return 'error'
     else:
-        sol = optimize.root_scalar(qw_fun, args=(r, s, u, nmax), bracket=(0, 1-1e-10), x0=.5, xtol=1e-12)
+        sol = optimize.root_scalar(qw_fun, args=(
+            r, s, u, nmax), bracket=(0, 1-1e-10), x0=.5, xtol=1e-12)
         return sol.root
 
 
@@ -227,7 +283,8 @@ def prob_rescue(W0, B0, r, s, u, nmax, verbose):
     nmax : int
         Maximum number of individuals to consider in Poisson distribution.
     verbose : bool
-        Whether to show the component probabilities and the weak mutation-weak selection approximations.
+        Whether to show the component probabilities and the weak mutation-weak
+        selection approximations.
 
     Returns
     -------
@@ -250,29 +307,6 @@ def prob_rescue(W0, B0, r, s, u, nmax, verbose):
 ###################
 # Population size #
 ###################
-
-
-def F(v, t, mu, u, nmax):
-    '''
-    Joint probability generating function of the number of wildtype and beneficial offspring of a wildtype individual.
-
-    Parameters
-    ----------
-    v, t : float
-        Parameters of pgf.
-    mu : float
-        Mean number of offspring.
-    u : float
-        Mutation rate.
-    nmax : int
-        Maximum number of offspring considered.
-
-    Returns
-    -------
-    float
-        Probability.
-    '''
-    return phi((1 - u) * v + u * t, mu, nmax)
 
 
 def M(r, s, u):
@@ -311,7 +345,9 @@ def Mn(r, s, u, n):
 
 def WBn(W0, B0, r, s, u, n):
     '''
-    Number of wildtype and mutant individuals in the population after n generations.
+    Number of wildtype and mutant individuals in the population after n
+    generations.
+
     Takes into account both rescued and extinct populations.
 
     Parameters
@@ -481,7 +517,8 @@ def Mhatn(r, s, u, n, nmax):
 
 def rescuedWBn(W0, B0, r, s, u, n, nmax, verbose):
     '''
-    Number of wildtype and mutant individuals in the population after n generations.  Takes into account both rescued and extinct populations.
+    Number of wildtype and mutant individuals in the population after n
+    generations.  Takes into account both rescued and extinct populations.
 
     Parameters
     ----------
