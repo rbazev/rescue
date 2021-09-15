@@ -10,4 +10,6 @@ In press at *Mathematical Biosciences*.
 
 * `rescue_simulations.py`: Code to run simulations of the evolutionary rescue model.
 
-* `prob_rescue.ipynb`: Jupyter notebook to generate Figure 1 showing the effect of different parameters on the probability of rescue from new mutations.
+* `prob_rescue.ipynb`: Code to generate Figure 1 showing the effect of different parameters on the probability of rescue from new mutations.
+
+* `pop_size.ipynb`: Code to generate Figure 2 showing the effect of different parameters on the growth of a rescued population.

@@ -477,7 +477,7 @@ def Zn(W0, B0, r, s, u, n):
 
 
 def K(W0, r, u):
-    """
+    '''
     Expected total number of beneficial mutations arising in a population.
 
     See Proposition 4.2.
@@ -496,7 +496,7 @@ def K(W0, r, u):
     float
         Number of mutations.
 
-    """
+    '''
     mu = 1 - r
     return W0 * (u * mu) / (1 - (1 - u) * mu)
 
