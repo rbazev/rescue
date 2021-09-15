@@ -84,7 +84,7 @@ def F(v, t, mu, u, nmax):
     mu : float
         Mean number of offspring.
     u : float
-        Mutation rate.
+        Beneficial mutation rate.
     nmax : int
         Maximum number of offspring considered.
 
@@ -107,7 +107,7 @@ def G(t, r, s, nmax):
     Parameters
     ----------
     t : float
-        Parameter of pgf.
+        Variable of pgf.
     r : float
         Degree of maladaptation of wildtype individuals.
     s : float
@@ -137,6 +137,8 @@ def qb_fun(qb, r, s, nmax):
 
     qb is estimated by finding the root of this function.
 
+    Assumes Poisson offspring distribution.
+
     See text below Equation 5.
 
     Parameters
@@ -162,6 +164,8 @@ def get_qb(r, s, nmax):
     '''
     Estimate the probability of extinction of a population starting from one
     beneficial individual, qb.
+
+    Assumes Poisson offspring distribution.
 
     The values of r and s must be > tol, where tol = 1e-8.
     Solution must be in the interval [0, 1-tol].
@@ -197,6 +201,8 @@ def qw_fun(qw, r, s, u, nmax):
 
     qw is estimated by finding the root of this function.
 
+    Assumes Poisson offspring distribution.
+
     See Proposition 2.2.
 
     Parameters
@@ -208,7 +214,7 @@ def qw_fun(qw, r, s, u, nmax):
     s : float
         Effect of a beneficial mutation.
     u : float
-        Mutation rate.
+        Beneficial mutation rate.
     nmax : int
         Maximum number of offspring considered.
 
@@ -227,6 +233,8 @@ def get_qw(r, s, u, nmax):
     Estimate the probability of extinction of a population starting from one
     wildtype individual, qw.
 
+    Assumes Poisson offspring distribution.
+
     The values of r and s must be > tol, where tol = 1e-8.
     Solution must be in the interval [0, 1-tol].
 
@@ -239,7 +247,7 @@ def get_qw(r, s, u, nmax):
     s : float
         Effect of a beneficial mutation.
     u : float
-        Mutation rate.
+        Beneficial mutation rate.
     nmax : int
         Maximum number of offspring considered.
 
@@ -283,9 +291,9 @@ def prob_rescue(W0, B0, r, s, u, nmax):
     s : float
         Effect of a beneficial mutation.
     u : float
-        Mutation rate.
+        Beneficial mutation rate.
     nmax : int
-        Maximum number of individuals to consider in Poisson distribution.
+        Maximum number of offspring considered.
 
     Returns
     -------
@@ -320,7 +328,7 @@ def approx_prob_rescue_new(W0, r, s, u):
     s : float
         Effect of a beneficial mutation.
     u : float
-        Mutation rate.
+        Beneficial mutation rate.
 
     Returns
     -------
@@ -372,7 +380,7 @@ def M(r, s, u):
     s : float
         Effect of a beneficial mutation.
     u : float
-        Mutation rate.
+        Beneficial mutation rate.
     '''
     return (1 - r) * np.array([[1 - u, u], [0, 1 + s]])
 
@@ -390,7 +398,7 @@ def Mn(r, s, u, n):
     s : float
         Effect of a beneficial mutation.
     u : float
-        Mutation rate.
+        Beneficial mutation rate.
     n : int
         Power.
     '''
@@ -402,8 +410,8 @@ def Mn(r, s, u, n):
 
 def WBn(W0, B0, r, s, u, n):
     '''
-    Number of wildtype and mutant individuals in the population after n
-    generations.
+    Expected number of wildtype and mutant individuals in the population after
+    n generations.
 
     Takes into account both rescued and extinct populations.
 
@@ -418,7 +426,7 @@ def WBn(W0, B0, r, s, u, n):
     s : float
         Effect of a beneficial mutation.
     u : float
-        Mutation rate.
+        Beneficial mutation rate.
     n : int
         Number of generations
 
@@ -434,7 +442,7 @@ def WBn(W0, B0, r, s, u, n):
 
 def Zn(W0, B0, r, s, u, n):
     '''
-    Total number of individuals in the population after n generations.
+    Expected total number of individuals in the population after n generations.
 
     Takes into account both rescued and extinct populations.
 
@@ -451,9 +459,9 @@ def Zn(W0, B0, r, s, u, n):
     s : float
         Effect of a beneficial mutation.
     u : float
-        Mutation rate.
+        Beneficial mutation rate.
     n : int
-        Number of generations
+        Number of generations.
 
     Returns
     -------
@@ -468,14 +476,46 @@ def Zn(W0, B0, r, s, u, n):
 ###########################
 
 
+def K(W0, r, u):
+    """
+    Expected total number of beneficial mutations arising in a population.
+
+    See Proposition 4.2.
+
+    Parameters
+    ----------
+    W0 : int
+        Initial number of wildtype individuals.
+    r : float
+        Degree of maladaptation of wildtype individuals.
+    u : float
+        Beneficial mutation rate.
+
+    Returns
+    -------
+    float
+        Number of mutations.
+
+    """
+    mu = 1 - r
+    return W0 * (u * mu) / (1 - (1 - u) * mu)
+
+
+##########################
+# 5. Rescued populations #
+##########################
+
+
 def dphi(t, mu, nmax):
     '''
     Derivative of phi.
 
+    Assumes Poisson offspring distribution.
+
     Parameters
     ----------
     t : float
-        Parameter of pgf.
+        Variable of pgf.
     mu : float
         Mean number of offspring.
     nmax : int
@@ -487,9 +527,9 @@ def dphi(t, mu, nmax):
         Probability.
     '''
     f = 0
-    for j in range(1, nmax):
-        P = pois(mu, j)
-        f += j * (t ** (j - 1)) * P
+    for k in range(1, nmax):
+        P = pois(mu, k)
+        f += k * (t ** (k - 1)) * P
     return f
 
 
@@ -497,14 +537,16 @@ def dFv(v, t, mu, u, nmax):
     '''
     Derivative of F with respect to v.
 
+    Assumes Poisson offspring distribution.
+
     Parameters
     ----------
     v, t : float
-        Parameters of pgf.
+        Variables of pgf.
     mu : float
         Mean number of offspring.
     u : float
-        Mutation rate.
+        Beneficial mutation rate.
     nmax : int
         Maximum number of offspring considered.
 
@@ -520,14 +562,16 @@ def dFt(v, t, mu, u, nmax):
     '''
     Derivative of F with respect to t.
 
+    Assumes Poisson offspring distribution.
+
     Parameters
     ----------
     v, t : float
-        Parameters of pgf.
+        Variables of pgf.
     mu : float
         Mean number of offspring.
     u : float
-        Mutation rate.
+        Beneficial mutation rate.
     nmax : int
         Maximum number of offspring considered.
 
@@ -543,10 +587,12 @@ def dG(t, r, s, nmax):
     '''
     Derivative of G.
 
+    Assumes Poisson offspring distribution.
+
     Parameters
     ----------
     t : float
-        Parameter of pgf.
+        Variable of pgf.
     r : float
         Degree of maladaptation of wildtype individuals.
     s : float
@@ -568,6 +614,8 @@ def Mhat(r, s, u, nmax):
     '''
     Reproduction matrix.
 
+    Assumes Poisson offspring distribution.
+
     Parameters
     ----------
     r : float
@@ -575,19 +623,25 @@ def Mhat(r, s, u, nmax):
     s : float
         Effect of a beneficial mutation.
     u : float
-        Mutation rate.
+        Beneficial mutation rate.
     nmax : int
         Maximum number of offspring considered.
     '''
     qb = get_qb(r, s, nmax)
     qw = get_qw(r, s, u, nmax)
     mu = 1 - r
-    return np.array([[dFv(qw, qb, mu, u, nmax), (qb / qw) * dFt(qw, qb, mu, u, nmax)], [0, dG(qb, r, s, nmax)]])
+    return np.array([[dFv(qw, qb, mu, u, nmax),
+                      (qb / qw) * dFt(qw, qb, mu, u, nmax)],
+                     [0, dG(qb, r, s, nmax)]])
 
 
 def Mhatn(r, s, u, n, nmax):
     '''
     nth power of reproduction matrix.
+
+    Assumes Poisson offspring distribution.
+
+    See Equation 23.
 
     Parameters
     ----------
@@ -596,7 +650,7 @@ def Mhatn(r, s, u, n, nmax):
     s : float
         Effect of a beneficial mutation.
     u : float
-        Mutation rate.
+        Beneficial mutation rate.
     n : int
         Power.
     nmax : int
@@ -605,13 +659,20 @@ def Mhatn(r, s, u, n, nmax):
     qb = get_qb(r, s, nmax)
     qw = get_qw(r, s, u, nmax)
     mu = 1 - r
-    return np.array([[dFv(qw, qb, mu, u, nmax) ** n, (qb / qw) * dFt(qw, qb, mu, u, nmax) * (dG(qb, r, s, nmax) ** n - dFv(qw, qb, mu, u, nmax) ** n) / (dG(qb, r, s, nmax) - dFv(qw, qb, mu, u, nmax))], [0, dG(qb, r, s, nmax) ** n]])
+    A = (qb / qw) * dFt(qw, qb, mu, u, nmax)
+    B1 = dG(qb, r, s, nmax) ** n
+    B2 = dFv(qw, qb, mu, u, nmax) ** n
+    C = dG(qb, r, s, nmax) - dFv(qw, qb, mu, u, nmax)
+    return np.array([[dFv(qw, qb, mu, u, nmax) ** n, A * (B1 - B2) / C],
+                     [0, dG(qb, r, s, nmax) ** n]])
 
 
-def rescuedWBn(W0, B0, r, s, u, n, nmax, verbose):
+def rescued_WBn(W0, B0, r, s, u, n, nmax):
     '''
-    Number of wildtype and mutant individuals in the population after n
-    generations.  Takes into account both rescued and extinct populations.
+    Expected number of wildtype and mutant individuals in a rescued population
+    after n generations.
+
+    Assumes Poisson offspring distribution.
 
     Parameters
     ----------
@@ -624,9 +685,11 @@ def rescuedWBn(W0, B0, r, s, u, n, nmax, verbose):
     s : float
         Effect of a beneficial mutation.
     u : float
-        Mutation rate.
+        Beneficial mutation rate.
     n : int
-        Number of generations
+        Number of generations.
+    nmax : int
+        Maximum number of offspring considered.
 
     Returns
     -------
@@ -640,11 +703,38 @@ def rescuedWBn(W0, B0, r, s, u, n, nmax, verbose):
     mhat = Mhatn(r, s, u, n, nmax)
     mm = (m - qq * mhat) / (1 - qq)
     v = np.array([W0, B0])
-    if verbose:
-        print(qb)
-        print(qw)
-        print(qq)
-        print(m)
-        print(mhat)
-        print(mm)
     return np.dot(v, mm)
+
+
+def rescued_Zn(W0, B0, r, s, u, n, nmax):
+    '''
+    Expected total number of individuals in a rescued population after n
+    generations.
+
+    Assumes Poisson offspring distribution.
+
+    See Equation 24.
+
+    Parameters
+    ----------
+    W0 : int
+        Initial number of wildtype individuals.
+    B0 : int
+        Initial number of mutant individuals
+    r : float
+        Degree of maladaptation of wildtype individuals.
+    s : float
+        Effect of a beneficial mutation.
+    u : float
+        Beneficial mutation rate.
+    n : int
+        Number of generations.
+    nmax : int
+        Maximum number of offspring considered.
+
+    Returns
+    -------
+    array([Wn, Bn])
+        Number of wildtype and mutant individuals after n generations.
+    '''
+    return rescued_WBn(W0, B0, r, s, u, n, nmax).sum()
