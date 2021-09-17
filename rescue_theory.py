@@ -480,6 +480,9 @@ def K(W0, r, u):
     '''
     Expected total number of beneficial mutations arising in a population.
 
+    Takes into account both rescued and extinct populations, both successful
+    and unsuccessful mutations.
+
     See Proposition 4.2.
 
     Parameters
@@ -498,13 +501,17 @@ def K(W0, r, u):
 
     '''
     mu = 1 - r
-    return W0 * (u * mu) / (1 - (1 - u) * mu)
+    return W0 * u * mu / (1 - (1 - u) * mu)
 
 
 ##########################
 # 5. Rescued populations #
 ##########################
 
+
+#######################
+# 5.1 Population size #
+#######################
 
 def dphi(t, mu, nmax):
     '''
@@ -740,6 +747,11 @@ def rescued_Zn(W0, B0, r, s, u, n, nmax):
     return rescued_WBn(W0, B0, r, s, u, n, nmax).sum()
 
 
+####################################################
+# 5.2 Weak selection / weak mutation approximation #
+####################################################
+
+
 def approx_rescued_Zn_new(W0, r, s, u, n):
     '''
     Expected total number of individuals in a rescued population after n
@@ -769,3 +781,35 @@ def approx_rescued_Zn_new(W0, r, s, u, n):
     A = (1 - r) ** n
     pb = 2 * (s - r)
     return W0 * A * (1 - u) ** n + (r / s) * A * (1 + s) ** n / pb
+
+
+####################################
+# 5.3 Number of rescuing mutations #
+####################################
+
+
+def KS(W0, r, s, u, nmax):
+    '''
+    Expected number of rescuing mutations arising in a rescued population.
+
+    See Equation 27.
+
+    Parameters
+    ----------
+    W0 : int
+        Initial number of wildtype individuals.
+    r : float
+        Degree of maladaptation of wildtype individuals.
+    u : float
+        Beneficial mutation rate.
+
+    Returns
+    -------
+    float
+        Number of mutations.
+
+    '''
+    pb = 1 - get_qb(r, s, nmax)
+    qw = get_qw(r, s, u, nmax)
+    mu = 1 - r
+    return W0 * pb * u * mu / ((1 - (1 - u) * mu) * (1 - qw ** W0))
