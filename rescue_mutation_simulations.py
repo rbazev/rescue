@@ -85,9 +85,17 @@ def evolve(W, B, r, s, u, rescue_threshold):
     Simulate evolution of a population until it either undergoes extinction or
     rescue.  Rescue is defined as the population size rising above a threshold.
 
+    Tracks the appearance and fate of individual mutations.
+
     Z = W + B is the total population size where B = B1 + B2 + ... + Bk.
 
-    Warning:
+    KS is the number of genotypes carrying beneficial mutations present when
+    the population is rescued.  If the population goes extinct KS = 0.  Note
+    that KS will underestimate the number predicted by theory if rescue is
+    declared before all W individuals disappear (because any remaining W
+    individuals could still generate "rescuing" mutations.
+
+    TS are the appearance times of all KS mutations.
 
     Parameters
     ----------
@@ -108,7 +116,7 @@ def evolve(W, B, r, s, u, rescue_threshold):
     -------
     tuple
         outcome, extinction/rescue time, arrays of W, B, and Z time series,
-        appearance_times, disappearance_times, KS, and TS.  
+        appearance_times, disappearance_times, KS, TS, and pop.
     '''
     extinct = False
     rescued = False
@@ -146,8 +154,8 @@ def evolve(W, B, r, s, u, rescue_threshold):
             KS += 1
             TS.append(appearance_times[i])
     if extinct:
-        return 'extinct', t, WW, ZZ - WW, ZZ, appearance_times,
+        return 'extinct', t, WW, ZZ - WW, ZZ, appearance_times,\
         disappearance_times, KS, TS, pop
     elif rescued:
-        return 'rescued', t, WW, ZZ - WW, ZZ, appearance_times,
+        return 'rescued', t, WW, ZZ - WW, ZZ, appearance_times,\
         disappearance_times, KS, TS, pop
