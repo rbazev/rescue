@@ -12,14 +12,14 @@ import numpy as np
 import numpy.random as rnd
 
 
-def get_next_gen(population, appearance_times, disappearance_times, r, s, u, t):
+def get_next_gen(pop, appearance_times, disappearance_times, r, s, u, t):
     '''
     Calculate the number of individuals in each genotype class in the next
     generation.
 
     Parameters
     ----------
-    population : list
+    pop : list
         Number of individuals of each genotype: [W, B1, B2, ..., Bk], where W
         is the number of wildtype individuals, k is the number of independent
         beneficial mutations that have ever occurred in the population, and
@@ -42,26 +42,26 @@ def get_next_gen(population, appearance_times, disappearance_times, r, s, u, t):
     Returns
     -------
     tuple
-        population, appearance_times, disappearance_times.
+        pop, appearance_times, disappearance_times.
     '''
     fitW = 1 - r
     assert fitW < 1
     fitB = (1 - r) * (1 + s)
     assert fitB > 1
-    ngenotypes = len(population)
+    ngenotypes = len(pop)
     assert ngenotypes == len(appearance_times)
     assert ngenotypes == len(disappearance_times)
     if ngenotypes > 1:
         for i in range(1, ngenotypes):
-            B = population[i]
+            B = pop[i]
             if B == 0:
                 nextB = 0
             else:
                 nextB = rnd.poisson(lam=fitB, size=B).sum()
-                population[i] = nextB
+                pop[i] = nextB
                 if nextB == 0:
                     disappearance_times[i] = t
-    W = population[0]
+    W = pop[0]
     if W == 0:
         nextW = 0
     else:
@@ -71,13 +71,13 @@ def get_next_gen(population, appearance_times, disappearance_times, r, s, u, t):
             if nextW_mutants > 0:
                 nextW -= nextW_mutants
                 for i in range(nextW_mutants):
-                    population.append(1)
+                    pop.append(1)
                     appearance_times.append(t)
                     disappearance_times.append(-1)
         else:
             disappearance_times[0] = t
-        population[0] = nextW
-    return population, appearance_times, disappearance_times
+        pop[0] = nextW
+    return pop, appearance_times, disappearance_times
 
 
 def evolve(W, B, r, s, u, rescue_threshold):
@@ -85,7 +85,7 @@ def evolve(W, B, r, s, u, rescue_threshold):
     Simulate evolution of a population until it either undergoes extinction or
     rescue.  Rescue is defined as the population size rising above a threshold.
 
-    Z = W + B1 + B2 + ... + Bk is the total population size.
+    Z = W + B is the total population size where B = B1 + B2 + ... + Bk.
 
     Warning:
 
@@ -107,31 +107,31 @@ def evolve(W, B, r, s, u, rescue_threshold):
     Returns
     -------
     tuple
-        outcome, extinction time, arrays of W, B, and Z time series.
+        outcome, extinction/rescue time, arrays of W, B, and Z time series,
+        appearance_times, disappearance_times, KS, and TS.  
     '''
     extinct = False
     rescued = False
     t = 0
     if B == 0:
-        population = [W]
+        pop = [W]
         appearance_times = [0]
         disappearance_times = [-1]
     else:
-        population = [W, B]
+        pop = [W, B]
         appearance_times = [0, 0]
         disappearance_times = [-1, -1]
-    Z = sum(population)
+    Z = sum(pop)
     assert 0 < Z < rescue_threshold
     WW = [W]
     ZZ = [Z]
     while (not extinct) and (not rescued):
         t += 1
-        population, appearance_times, disappearance_times = \
-        get_next_gen(population, appearance_times, disappearance_times, r, s,
-            u, t)
-        W = population[0]
-        Z = sum(population)
-        WW.append(population[0])
+        pop, appearance_times, disappearance_times = \
+        get_next_gen(pop, appearance_times, disappearance_times, r, s, u, t)
+        W = pop[0]
+        Z = sum(pop)
+        WW.append(pop[0])
         ZZ.append(Z)
         if Z == 0:
             extinct = True
@@ -139,13 +139,15 @@ def evolve(W, B, r, s, u, rescue_threshold):
             rescued = True
     WW = np.array(WW)
     ZZ = np.array(ZZ)
-    Ks = 0
-    Ts = []
+    KS = 0
+    TS = []
     for i in range(1, len(disappearance_times)):
         if disappearance_times[i] == -1:
-            Ks += 1
-            Ts.append(appearance_times[i])
+            KS += 1
+            TS.append(appearance_times[i])
     if extinct:
-        return 'extinct', t, WW, ZZ - WW, ZZ, appearance_times, disappearance_times, Ks, Ts, population
+        return 'extinct', t, WW, ZZ - WW, ZZ, appearance_times,
+        disappearance_times, KS, TS, pop
     elif rescued:
-        return 'rescued', t, WW, ZZ - WW, ZZ, appearance_times, disappearance_times, Ks, Ts, population
+        return 'rescued', t, WW, ZZ - WW, ZZ, appearance_times,
+        disappearance_times, KS, TS, pop
