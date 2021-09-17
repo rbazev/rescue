@@ -79,7 +79,7 @@ def evolve(W, B, r, s, u, rescue_threshold):
     Returns
     -------
     tuple
-        outcome, extinction time, arrays of W, B, and Z time series.
+        outcome, extinction/rescue time, arrays of W, B, and Z time series.
     '''
     Z = W + B
     assert Z < rescue_threshold
