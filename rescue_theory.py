@@ -1,10 +1,10 @@
-############################################################################
-# Code for performing numerical calculations based on the theory presented #
-# in the paper:                                                            #
-# "A Branching Process Model of Evolutionary Rescue"                       #
-# Ricardo B. R. Azevedo & Peter Olofsson                                   #
-# Last updated: September 17, 2021                                         #
-############################################################################
+###############################################################################
+# Code for performing numerical calculations based on the theory presented    #
+# in the paper:                                                               #
+# "A Branching Process Model of Evolutionary Rescue".                         #
+# Authors: Ricardo B. R. Azevedo & Peter Olofsson.                            #
+# Last updated: September 17, 2021.                                           #
+###############################################################################
 
 
 from math import exp
