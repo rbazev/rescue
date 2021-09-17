@@ -1,9 +1,11 @@
-########################################################
-# Python code for simulation of the model in the paper #
-# "A Branching Process Model of Evolutionary Rescue"   #
-# Ricardo B. R. Azevedo & Peter Olofsson               #
-# Last updated: September 15, 2021                     #
-########################################################
+###############################################################################
+# Code for the simulation of population dynamics under evolutionary rescue    #
+# by new mutations using the model described in the paper:                    #
+# "A Branching Process Model of Evolutionary Rescue".                         #
+# Authors: Ricardo B. R. Azevedo & Peter Olofsson.                            #
+# Note: tracks the appearance and spread of individual beneficial mutations.  #
+# Last updated: September 17, 2021.                                           #
+###############################################################################
 
 
 import numpy as np
