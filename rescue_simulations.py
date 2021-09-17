@@ -14,7 +14,7 @@ import numpy.random as rnd
 
 def get_next_gen(W, B, r, s, u):
     '''
-    Calculate the number of wildtype (W) and beneficial (B) individuals in the
+    Calculate the number of wildtype (W) and mutant (B) individuals in the
     next generation.
 
     Parameters
@@ -22,7 +22,7 @@ def get_next_gen(W, B, r, s, u):
     W : int
         Number of wildtype individuals.
     B : int
-        Number of beneficial individuals
+        Number of mutant individuals.
     r : float
         Degree of maladaptation of wildtype individuals.
     s : float
@@ -66,7 +66,7 @@ def evolve(W, B, r, s, u, rescue_threshold):
     W : int
         Number of wildtype individuals.
     B : int
-        Number of beneficial individuals
+        Number of mutant individuals.
     r : float
         Degree of maladaptation of wildtype individuals.
     s : float
@@ -120,7 +120,7 @@ def evolven(W, B, r, s, u, n):
     W : int
         Number of wildtype individuals.
     B : int
-        Number of beneficial individuals
+        Number of mutant individuals.
     r : float
         Degree of maladaptation of wildtype individuals.
     s : float
