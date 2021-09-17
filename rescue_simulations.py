@@ -1,9 +1,9 @@
 ###############################################################################
-# Code for the simulation of population dynamics under evolutionary rescue    #
-# using the model described in the paper:                                     #
+# Code for simulating population dynamics under evolutionary rescue using the #
+# model described in the paper:                                               #
 # "A Branching Process Model of Evolutionary Rescue".                         #
 # Authors: Ricardo B. R. Azevedo & Peter Olofsson.                            #
-# Note: does not track individual beneficial mutations.                       #
+# Note: not tracking individual beneficial mutations.                         #
 # Last updated: September 17, 2021.                                           #
 ###############################################################################
 
