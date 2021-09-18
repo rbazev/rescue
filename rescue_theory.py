@@ -814,3 +814,178 @@ def KS(W0, r, s, u, nmax):
     qw = get_qw(r, s, u, nmax)
     mu = 1 - r
     return W0 * pb * u * mu / ((1 - (1 - u) * mu) * (1 - qw ** W0))
+
+
+##############################################
+# 4.2 Waiting time for a beneficial mutation #
+##############################################
+
+
+def phitilde(t, r, s, u, nmax):
+    '''
+    Pgf of W + BS offspring of a wildtype individual, where W is the number of
+    wildtype offspring and BS is the number of mutant offspring that are
+    successful in rescuing the population.
+
+    Assumes Poisson offspring distribution.
+
+    See Equation after proof of Proposition 4.3.
+
+    Parameters
+    ----------
+    t : float
+        Variable of pgf.
+    r : float
+        Degree of maladaptation of wildtype individuals.
+    s : float
+        Effect of a beneficial mutation.
+    u : float
+        Beneficial mutation rate.
+    nmax : int
+        Maximum number of offspring considered.
+
+    Returns
+    -------
+    float
+        Probability.
+    '''
+    qb = get_qb(r, s, nmax)
+    pb = 1 - qb
+    mu = 1 - r
+    return phi((1 - u + u * pb) * t + u * qb, mu, nmax)
+
+
+def utilde(r, s, u, nmax):
+    '''
+    The conditional distribution of BS given W + BS is binomial with success
+    probability utilde.
+
+    Assumes Poisson offspring distribution.
+
+    Parameters
+    ----------
+    r : float
+        Degree of maladaptation of wildtype individuals.
+    s : float
+        Effect of a beneficial mutation.
+    u : float
+        Beneficial mutation rate.
+    nmax : int
+        Maximum number of offspring considered.
+
+    Returns
+    -------
+    float
+        Probability.
+    '''
+    qb = get_qb(r, s, nmax)
+    pb = 1 - qb
+    return u * pb / (1 - u + u * pb)
+
+
+def Htilde(t, r, s, u, n, nmax):
+    '''
+    Recursive function used in calculating the distribution of TS, the waiting
+    time for a rescuing mutation.
+
+    Assumes Poisson offspring distribution.
+
+    See Proposition 4.3 and Corolary 4.3.1.
+
+    Parameters
+    ----------
+    t : float
+        Variable of pgf.
+    r : float
+        Degree of maladaptation of wildtype individuals.
+    s : float
+        Effect of a beneficial mutation.
+    u : float
+        Beneficial mutation rate.
+    n : int
+        Number of iterations.
+    nmax : int
+        Maximum number of offspring considered.
+
+    Returns
+    -------
+    float
+        Probability.
+    '''
+    h = 1
+    for i in range(n):
+        h = phitilde(t * h, r, s, u, nmax)
+    return h
+
+
+
+def prob_time(W0, r, s, u, n, nmax):
+    '''
+    Probability that TS > n generations conditional on rescue.
+
+    Assumes Poisson offspring distribution.
+
+    See Corolary 5.0.1.
+
+    Parameters
+    ----------
+    W0 : int
+        Initial number of wildtype individuals.
+    r : float
+        Degree of maladaptation of wildtype individuals.
+    s : float
+        Effect of a beneficial mutation.
+    u : float
+        Beneficial mutation rate.
+    n : int
+        Number of generations.
+    nmax : int
+        Maximum number of offspring considered.
+
+    Returns
+    -------
+    float
+        Probability.
+    '''
+    qw = get_qw(r, s, u, nmax)
+    return ((Htilde(1 - utilde(r, s, u, nmax), r, s, u, n, nmax)) ** W0 - qw ** W0) / (1 - qw ** W0)
+
+
+def get_time(W0, r, s, u, nmax, tol):
+    '''
+    Calculate expected waiting time for a rescuing muation in a rescued
+    population.
+
+    Assumes Poisson offspring distribution.
+
+    Parameters
+    ----------
+    W0 : int
+        Initial number of wildtype individuals.
+    r : float
+        Degree of maladaptation of wildtype individuals.
+    s : float
+        Effect of a beneficial mutation.
+    u : float
+        Beneficial mutation rate.
+    nmax : int
+        Maximum number of offspring considered.
+    tol : type
+        Description of parameter `tol`.
+
+    Returns
+    -------
+    float
+        Expected waiting time.
+    '''
+    t = 0
+    n = 0
+    stalled = False
+    while not stalled:
+        newt = t + prob_time(W0, r, s, u, n, nmax)
+        deltat = newt - t
+        t = newt
+        if deltat < tol:
+            stalled = True
+        n += 1
+    return t
