@@ -955,12 +955,12 @@ def prob_time(W0, r, s, u, n, nmax):
     return ((Htilde(1 - utilde(r, s, u, nmax), r, s, u, n, nmax)) ** W0 - qw ** W0) / (1 - qw ** W0)
 
 
-def get_time(W0, r, s, u, nmax, tol):
+def approx_prob_time(W0, r, s, u, n):
     '''
-    Calculate expected waiting time for a rescuing muation in a rescued
-    population.
+    Probability that TS > n generations conditional on rescue assuming weak
+    selection / weak mutation.
 
-    Assumes Poisson offspring distribution.
+    See Equation 28.
 
     Parameters
     ----------
@@ -972,24 +972,13 @@ def get_time(W0, r, s, u, nmax, tol):
         Effect of a beneficial mutation.
     u : float
         Beneficial mutation rate.
-    nmax : int
-        Maximum number of offspring considered.
-    tol : float
-        Tolerance.
-
+    n : int
+        Number of generations.
+    
     Returns
     -------
     float
-        Expected waiting time.
+        Probability.
     '''
-    t = 0
-    n = 0
-    stalled = False
-    while not stalled:
-        newt = t + prob_time(W0, r, s, u, n, nmax)
-        deltat = newt - t
-        t = newt
-        if deltat < tol:
-            stalled = True
-        n += 1
-    return t
+    C = 2 * W0 * u * (s - r) / r
+    return r * np.exp(-r * n) * (C * np.exp(-C * (1 - np.exp(-r * n)))) / (1 - exp(-C))
