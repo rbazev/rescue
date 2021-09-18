@@ -918,6 +918,10 @@ def Htilde(t, r, s, u, n, nmax):
     return h
 
 
+############################################
+# 5.4 Waiting time for a rescuing mutation #
+############################################
+
 
 def prob_time(W0, r, s, u, n, nmax):
     '''
@@ -970,8 +974,8 @@ def get_time(W0, r, s, u, nmax, tol):
         Beneficial mutation rate.
     nmax : int
         Maximum number of offspring considered.
-    tol : type
-        Description of parameter `tol`.
+    tol : float
+        Tolerance.
 
     Returns
     -------
