@@ -505,14 +505,10 @@ def K(W0, r, u):
     return W0 * u * mu / (1 - (1 - u) * mu)
 
 
-##########################
-# 5. Rescued populations #
-##########################
-
-
 #######################
 # 5.1 Population size #
 #######################
+
 
 def dphi(t, mu, nmax):
     '''
@@ -974,7 +970,7 @@ def approx_prob_time(W0, r, s, u, n):
         Beneficial mutation rate.
     n : int
         Number of generations.
-    
+
     Returns
     -------
     float
