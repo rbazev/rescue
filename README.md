@@ -1,6 +1,8 @@
 # A branching process model of evolutionary rescue
 
-In press at *Mathematical Biosciences*.
+Data and code associated with: 
+
+P Olofsson, RBR Azevedo.  A branching process model of evolutionary rescue.  [*Mathematical Biosciences* 341. doi: 10.1016/j.mbs.2021.108708](https://www.sciencedirect.com/science/article/pii/S0025556421001255?via%3Dihub)
 
 ## Contents
 
